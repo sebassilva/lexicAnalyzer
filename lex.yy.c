@@ -610,9 +610,37 @@ char *yytext;
 * Compiladores  Grupo 2
 * Facultad de Ingenieria UNAM
 */        
+#include <string.h>
+
 FILE *archSal;
-void regexMatched(char *text);
-#line 616 "lex.yy.c"
+void regexMatched(int class, char *text, int ix);
+// void handleErr(char *err);
+int findInStaticTable(int class, char *text);
+int line = 0;
+
+char *RESERVADAS[] = {
+    "Bul", "Cadena", "Cierto", 
+    "Entero", "Falso", "Haz", 
+    "Mientras", "Para", "Real",
+    "Si","Sino"
+    };
+
+char *ESPECIALES[] = {"(", ")", ",", ";", "[", "]"};
+
+char *ASIGNACION[] = {":="};
+
+char *RELACIONALES[] = {
+    ".DIF.",".IGL.",
+    ".MN.", ".MNI.",
+    ".MY.", ".MYI."
+    };
+    
+char *ARITMETICOS[] = {"+","-","*","/","%"} ;
+
+
+
+
+#line 644 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -794,9 +822,9 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 32 "main.l"
+#line 60 "main.l"
 
-#line 800 "lex.yy.c"
+#line 828 "lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -881,83 +909,83 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 33 "main.l"
-fprintf(archSal, "reservadas ");
+#line 61 "main.l"
+fprintf(archSal, "reservadas ");    regexMatched(0, yytext, -1);
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 34 "main.l"
-fprintf(archSal, "identificador "); fprintf(archSal, " -%s- ", yytext);regexMatched(yytext);
+#line 62 "main.l"
+fprintf(archSal, "identificador "); regexMatched(1, yytext, -1); //i.push(yytext) buscar, insertar, return ix
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 35 "main.l"
-fprintf(archSal, "especiales ");
+#line 63 "main.l"
+fprintf(archSal, "especiales ");    regexMatched(2, yytext, -1);
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 36 "main.l"
-fprintf(archSal, "asignacion ");
+#line 64 "main.l"
+fprintf(archSal, "asignacion ");    regexMatched(3, yytext, -1);
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 37 "main.l"
-fprintf(archSal, "relacionales");
+#line 65 "main.l"
+fprintf(archSal, "relacionales");   regexMatched(4, yytext, -1);
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 38 "main.l"
-fprintf(archSal, "aritmeticos");
+#line 66 "main.l"
+fprintf(archSal, "aritmeticos");    regexMatched(5, yytext, -1);
 	YY_BREAK
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-#line 39 "main.l"
-fprintf(archSal, "cadena");
+#line 67 "main.l"
+fprintf(archSal, "cadena");         regexMatched(6, yytext, -1); //c.push(yytext) inseta, return ix
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 40 "main.l"
-fprintf(archSal, "entero");
+#line 68 "main.l"
+fprintf(archSal, "entero");         regexMatched(7, yytext, -1); //e.push(yytext) buscar, insertar, return ix
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 41 "main.l"
-fprintf(archSal, "real");
+#line 69 "main.l"
+fprintf(archSal, "real");           regexMatched(8, yytext, -1); //r.push(yytext)buscar, insertar, return ix
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 42 "main.l"
-fprintf(archSal, "cientifico");
+#line 70 "main.l"
+fprintf(archSal, "cientifico");     regexMatched(8, yytext, -1); // r.push(yytext) buscar, insertar, return ixreturn ix 
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 43 "main.l"
-fprintf(archSal, " ");
+#line 71 "main.l"
+fprintf(archSal, " "); 
 	YY_BREAK
 case 12:
 /* rule 12 can match eol */
 YY_RULE_SETUP
-#line 44 "main.l"
-fprintf(archSal, "\n");
+#line 72 "main.l"
+fprintf(archSal, "\n"); line++;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 45 "main.l"
-fprintf(archSal, "\t");
+#line 73 "main.l"
+fprintf(archSal, "\t"); 
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 46 "main.l"
-fprintf(archSal, "{%s}", yytext);
+#line 74 "main.l"
+fprintf(archSal, "error line %d {%s}", line, yytext); //handleErr(yytext);
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 49 "main.l"
+#line 77 "main.l"
 ECHO;
 	YY_BREAK
-#line 961 "lex.yy.c"
+#line 989 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1954,7 +1982,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 49 "main.l"
+#line 77 "main.l"
 
 
 
@@ -1970,6 +1998,54 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-void regexMatched(char *text){
-    printf("%s detected", text);
+void regexMatched(int class, char *text, int ix){
+
+    if(ix == -1){
+        //Tabla estática
+        int staticIx = findInStaticTable(class, text);
+        printf("\nclass %d, staticIx: %d", class, staticIx);
+        // tokens.push(class, staticIx);
+    }else{
+         //TABLAS DINAMICAS
+        //push en tabla dinamica que regresa ix 
+    //entonces push a tabla principal
+    }
 }
+
+
+
+int findInStaticTable(int class, char *text){
+    char **table;
+    printf("finding static table");
+    switch(class){
+        case 0: 
+        table = RESERVADAS;
+        break;
+
+        case 2: 
+        table = ESPECIALES;
+        break;
+
+        case 3: 
+        table = ASIGNACION;
+        break;
+
+        case 4: 
+        table = RELACIONALES;
+        break;
+
+        case 5: 
+        table = ARITMETICOS;
+        break;
+
+    }
+    int size =  sizeof(table);
+    for(int i=0; i<= size; i++){   
+        printf("\n%s, %s, compare: %d", text, table[i], strcmp(text, table[i]));
+        if(strcmp(text, table[i]) == 0){
+            return i;
+        }
+    }
+    return -1;
+}
+

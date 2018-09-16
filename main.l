@@ -8,10 +8,33 @@
 #include <string.h>
 
 FILE *archSal;
-void regexMatched(char *text);
-void handleErr(char *err);
-int findInStaticTable(char *text, char *table[]);
+void regexMatched(int class, char *text, int ix);
+// void handleErr(char *err);
+int findInStaticTable(int class, char *text);
 int line = 0;
+
+char *RESERVADAS[] = {
+    "Bul", "Cadena", "Cierto", 
+    "Entero", "Falso", "Haz", 
+    "Mientras", "Para", "Real",
+    "Si","Sino"
+    };
+
+char *ESPECIALES[] = {"(", ")", ",", ";", "[", "]"};
+
+char *ASIGNACION[] = {":="};
+
+char *RELACIONALES[] = {
+    ".DIF.",".IGL.",
+    ".MN.", ".MNI.",
+    ".MY.", ".MYI."
+    };
+    
+char *ARITMETICOS[] = {"+","-","*","/","%"} ;
+
+
+
+
 %}
 
 charmayus [A-Z]
@@ -36,19 +59,19 @@ cadena \"[^"](\\.|[^\\"])*\"
 
 %%
 {reservadas}    fprintf(archSal, "reservadas ");    regexMatched(0, yytext, -1);
-{identificador} fprintf(archSal, "identificador "); regexMatched(1, yytext, i.push(yytext)); //push() buscar, insertar, return ix
+{identificador} fprintf(archSal, "identificador "); regexMatched(1, yytext, -1); //i.push(yytext) buscar, insertar, return ix
 {especiales}    fprintf(archSal, "especiales ");    regexMatched(2, yytext, -1);
 {asignacion}    fprintf(archSal, "asignacion ");    regexMatched(3, yytext, -1);
 {relacionales}  fprintf(archSal, "relacionales");   regexMatched(4, yytext, -1);
 {aritmeticos}   fprintf(archSal, "aritmeticos");    regexMatched(5, yytext, -1);
-{cadena}        fprintf(archSal, "cadena");         regexMatched(6, yytext, c.push(yytext)); //push() inseta, return ix
-{entero}        fprintf(archSal, "entero");         regexMatched(7, yytext, e.push(yytext)); //push() buscar, insertar, return ix
-{real}          fprintf(archSal, "real");           regexMatched(8, yytext, r.push(yytext)); //push() buscar, insertar, return ix
-{cientifico}    fprintf(archSal, "cientifico");     regexMatched(8, yytext, r.push(yytext)); //push() buscar, insertar, return ixreturn ix 
+{cadena}        fprintf(archSal, "cadena");         regexMatched(6, yytext, -1); //c.push(yytext) inseta, return ix
+{entero}        fprintf(archSal, "entero");         regexMatched(7, yytext, -1); //e.push(yytext) buscar, insertar, return ix
+{real}          fprintf(archSal, "real");           regexMatched(8, yytext, -1); //r.push(yytext)buscar, insertar, return ix
+{cientifico}    fprintf(archSal, "cientifico");     regexMatched(8, yytext, -1); // r.push(yytext) buscar, insertar, return ixreturn ix 
 {espacio}       fprintf(archSal, " "); 
 {salto}         fprintf(archSal, "\n"); line++;
 {tab}           fprintf(archSal, "\t"); 
-.               fprintf(archSal, "error line %d {%s}", line, yytext); handleErr(yytext);
+.               fprintf(archSal, "error line %d {%s}", line, yytext); //handleErr(yytext);
 
 
 %%
@@ -69,30 +92,23 @@ void regexMatched(int class, char *text, int ix){
 
     if(ix == -1){
         //Tabla estática
-        ix = findInStaticTable(class, text);
-        tokens.push(class, staticIx);
-    }
-
-
-    //Verificar a qué tabla debe ir
-    if(ix == -1){
-        //TABLAS ESTATICAS
-        //Buscar ix en tabla estática de la clase a la que 
-        ix = c:
-    }
-        //TABLAS DINAMICAS
+        int staticIx = findInStaticTable(class, text);
+        printf("\nclass %d, staticIx: %d", class, staticIx);
+        // tokens.push(class, staticIx);
+    }else{
+         //TABLAS DINAMICAS
         //push en tabla dinamica que regresa ix 
     //entonces push a tabla principal
-    
-    printf("%s detected", text);
+    }
 }
 
 
 
 int findInStaticTable(int class, char *text){
-    char *table[]; //?
-
+    char **table;
+    printf("finding static table");
     switch(class){
+        
         case 0: 
         table = RESERVADAS;
         break;
@@ -114,8 +130,8 @@ int findInStaticTable(int class, char *text){
         break;
 
     }
-    int size =  sizeof(table) / sizeof(table[0]);
-    for(int i=0; i<= size; i++){
+    int size =  sizeof(table);
+    for(int i=0; i<= size; i++){   
         if(strcmp(text, table[i]) == 0){
             return i;
         }
