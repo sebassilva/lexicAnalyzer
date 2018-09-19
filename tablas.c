@@ -19,7 +19,7 @@ char *RELACIONALES[] = {
     ".MY.", ".MYI."
     };
     
-char *ARITMERICOS[] = {"+","-","*","/","%"};
+char *ARITMERICOS[] = {"+","-","*","/","%"} ;
 
 int main() {
     return 0;

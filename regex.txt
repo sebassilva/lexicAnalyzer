@@ -1,1 +1,3 @@
 Entero
+Cadena
+$$esto es un comentario por favor shh
